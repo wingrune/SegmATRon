@@ -1,0 +1,28 @@
+MODEL:
+  TYPE: "segmatron_random"
+  CONFIG: ./configs/config_oneformer_ade.yaml
+  WEIGHTS: ../../outputs/hm3d2_ade20k_640k_bs4/model_0159999.pth
+  NUM_CLASSES: 150
+  INPUT_RESOLUTION: 320
+  NUM_LAYERS: 4
+  NUM_HEADS: 8
+  EMBEDDING_DIM: 512
+  BLOCK_SIZE: 2060
+  IMG_FEATURE_SIZE: 256
+  OUTPUT_SIZE: 512
+  MASK_EMB_SIZE: 256
+  ADAPTIVE_LR: 1e-3
+  NUM_ACTIONS: 2
+  ADAPTIVE_BACKBONE: True
+DATASET:
+  TEST:
+    TYPE: "multistep"
+    MODE: "test"
+    ANNOTATION_ROOT: "data/segmatron_ai2thor/annotations/segmatron_v1_test.json"
+    IMAGE_ROOT: "data/segmatron_ai2thor/test"
+EVALUATOR:
+  TYPE: "random_policy_evaluator"
+  BATCH_SIZE: 1
+  NUM_WORKERS: 1
+  OUTPUT_DIRECTORY: "evaluation_results/segmatron_1_step_ai2thor"
+  CHECKPOINT: "checkpoints/segmatron_1_step.pt"

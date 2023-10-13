@@ -1,0 +1,18 @@
+MODEL:
+  TYPE: "oneformer"
+  CONFIG: ./configs/config_oneformer_ade.yaml
+  WEIGHTS: ../../outputs/hm3d2_ade20k_640k_bs4/model_0159999.pth
+  NUM_CLASSES: 150
+DATASET:
+  TEST:
+    TYPE: "multistep"
+    MODE: "test"
+    ANNOTATION_ROOT: "data/segmatron_ai2thor/annotations/segmatron_v1_test.json"
+    IMAGE_ROOT: "data/segmatron_ai2thor/test"
+EVALUATOR:
+  TYPE: "random_policy_evaluator"
+  BATCH_SIZE: 1
+  NUM_WORKERS: 1
+  OUTPUT_DIRECTORY: "evaluation_results/single_frame_baseline_ai2thor"
+  CHECKPOINT: "checkpoints/single_frame_baseline.pt"
+
