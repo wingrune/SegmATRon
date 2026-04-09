@@ -1,5 +1,14 @@
 # Segmatron: Embodied Adaptive Semantic Segmentation
 
+## Paper
+
+This repository contains an implementation of the method proposed in the paper [SegmATRon: Embodied adaptive semantic segmentation for indoor environment](https://www.sciencedirect.com/science/article/abs/pii/S0925231225008410) published in *Neurocomputing* (Volume 638, 14 July 2025).
+
+The paper introduces SegmATRon, an embodied semantic segmentation approach that improves segmentation quality by collecting additional views in an indoor environment and adapting the segmentation model during inference with a hybrid multi-component loss.
+
+
+![SegmATRon graphical abstract](images/segmatron_GA.png)
+
 ## Installation
 
 The evaluation of SegmATRon can be performed inside a docker container. One can find all necessary files and scripts to build a docker image and run a docker container inside "docker/" folder. Read the README.md inside the "docker/" directory. Prepare data and checkpoints before building the docker image.
@@ -106,4 +115,7 @@ The evaluator will output visualizations and results in a folder called
 
 Note: the evaluation results can be slightly different depending on the specific random actions chosen by SegmATRon (1 step). For demo purposes we set random seeds.
 
+## TODO
 
+- Release code for training SegmATRon models.
+- Release interactive mode for frame collection.
