@@ -1,7 +1,3 @@
-# ------------------------------------------------------------------------------
-# Reference: https://github.com/allenai/interactron/blob/main/engine/random_policy_evaluator.py
-# Modified by Tatiana Zemskova (https://github.com/wingrune)
-# ------------------------------------------------------------------------------
 
 import torchvision.ops
 import numpy as np
@@ -14,11 +10,7 @@ from torch.nn import functional as F
 
 from torch.utils.data.dataloader import DataLoader
 
-from utils.constants import THOR_CLASS_IDS, tlvis_classes
-from utils.detection_utils import match_predictions_to_detections
 from utils.storage_utils import collate_fn
-from utils.transform_utis import transform, inv_transform
-from models.detr_models.util.box_ops import box_cxcywh_to_xyxy
 
 from datasets.multistep_dataset import MultiStepDataset
 
@@ -37,7 +29,7 @@ class RandomPolicyEvaluator:
                 torch.load(config.EVALUATOR.CHECKPOINT, map_location=torch.device('cpu'))['model'], strict=True)
         if config.DATASET.TEST.TYPE == "multistep":
             self.test_dataset = MultiStepDataset(config.DATASET.TEST.IMAGE_ROOT, config.DATASET.TEST.ANNOTATION_ROOT,
-                                            config.DATASET.TEST.MODE, transform=transform)            
+                                            config.DATASET.TEST.MODE)            
         else:
             print(f"Unknown dataset type: {config.DATASET.TEST.TYPE}")
             exit()
@@ -48,8 +40,6 @@ class RandomPolicyEvaluator:
         self.device = torch.cuda.current_device()
         self.model = self.model.to(self.device)
         self.no_grad = False
-        if config.MODEL.TYPE == "oneformer" or config.MODEL.TYPE == "single_frame_light":
-            self.no_grad = True
 
         self.out_dir = config.EVALUATOR.OUTPUT_DIRECTORY + "/" + datetime.now().strftime("%m-%d-%Y-%H:%M:%S") + "/"
 

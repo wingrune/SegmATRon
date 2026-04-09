@@ -1,8 +1,3 @@
-# ------------------------------------------------------------------------------
-# Reference: https://github.com/allenai/interactron/blob/main/utils/config_utils.py
-# Modified by Tatiana Zemskova (https://github.com/wingrune)
-# ------------------------------------------------------------------------------
-
 import yaml
 import argparse
 import os
@@ -46,7 +41,7 @@ def get_config(cfg):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Train SegmATRon Model')
+    parser = argparse.ArgumentParser(description='Train Interactron Model')
     parser.add_argument('--config_file', type=str, required=True,
                         help='path to the configuration file for this training run')
     parser.add_argument('--devices', type=list, default='cpu', help='sum the integers (default: find the max)')
@@ -56,20 +51,26 @@ def get_args():
 
 
 def build_model(args):
-    arg_check(args.MODEL.TYPE, ["segmatron_random", "oneformer"], "model")
-    if args.MODEL.TYPE == "segmatron_random":
-        from models.segmatron_random import segmatron_random
-        model = segmatron_random(args)
-    elif args.MODEL.TYPE == "oneformer":
-        from models.oneformer_single_frame import oneformer_single_frame
-        model = oneformer_single_frame(args)
-  
-    return model
+    arg_check(args.MODEL.TYPE, ["mask2former", "maskdino", "mask2former_segmatron", 
+                                "maskdino_segmatron"], "model")
 
+    if args.MODEL.TYPE == "mask2former":
+        from models.mask2former_single_frame import mask2former_single_frame
+        model = mask2former_single_frame(args)
+    elif args.MODEL.TYPE == "mask2former_segmatron":
+        from models.mask2former_segmatron import mask2former_segmatron
+        model = mask2former_segmatron(args)
+    elif args.MODEL.TYPE == "maskdino":
+        from models.maskdino_single_frame import maskdino_single_frame
+        model = maskdino_single_frame(args)
+    elif args.MODEL.TYPE == "maskdino_segmatron":
+        from models.maskdino_segmatron import maskdino_segmatron
+        model = maskdino_segmatron(args)
+    return model
 
 def build_evaluator(model, args, load_checkpoint=False):
     arg_check(args.EVALUATOR.TYPE, ["random_policy_evaluator"],
-              "evaluator")
+                                    "evaluator")
     if args.EVALUATOR.TYPE == "random_policy_evaluator":
         from engine.random_policy_evaluator import RandomPolicyEvaluator
         evaluator = RandomPolicyEvaluator(model, args, load_checkpoint=load_checkpoint)

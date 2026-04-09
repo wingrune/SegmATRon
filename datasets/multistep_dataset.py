@@ -1,15 +1,9 @@
-# ------------------------------------------------------------------------------
-# Reference: https://github.com/allenai/interactron/blob/main/datasets/sequence_dataset.py
-# Modified by Tatiana Zemskova (https://github.com/wingrune)
-# ------------------------------------------------------------------------------
-
 import torch
 from torch.utils.data import Dataset
 import json
 import random
 from PIL import Image
 import numpy as np
-from detectron2.structures import BitMasks, Instances, polygons_to_bitmask
 from torch.nn import functional as F
 
 

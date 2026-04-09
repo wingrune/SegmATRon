@@ -1,4 +1,3 @@
-# This code is copied from https://github.com/allenai/interactron
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np

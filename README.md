@@ -1,5 +1,4 @@
 # Segmatron: Embodied Adaptive Semantic Segmentation
-![alt text](images/segmatron_GA.png)
 
 ## Installation
 
@@ -38,23 +37,28 @@ cd ../../../../..
 ```
 ## Data and pretrained checkpoints
 
-Test data and pretrained checkpoints can be downloaded by using the following links:
+Test data and pretrained checkpoints can be downloaded by using the following links from our Anonymous Google Drive:
 
-- [OneFormer (Single Frame Baseline)](https://disk.yandex.ru/d/p2GKLZ_Z49IWdA)
-- [SegmATRon (1 step)](https://disk.yandex.ru/d/DwRCff70Ij3ang)
-- [SegmATRon Habitat and AI2-Thor data](https://disk.yandex.ru/d/6Ek7u6LXDccrSA)
+- [Mask2Former (Single Frame Baseline)](https://drive.google.com/file/d/14SXE0rZU7H9NAxOfPSOvhZsgW_2MFiXK/view?usp=drive_link)
+- [MaskDINO (Single Frame Baseline)](https://drive.google.com/file/d/1BaKlgArItOKgXyKQ-6lldl1O_m-DH3He/view?usp=drive_link)
+- [SegmATRon (MaskFormer)](https://drive.google.com/file/d/1fndbrlwdcJDGRNaXjxAfGWpdiRpbf5g0/view?usp=drive_link)
+- [SegmATRon (MaskDINO)](https://drive.google.com/file/d/1veThLJDk_WPEwISTz9vaQOr_yh2dajqW/view?usp=drive_link)
+- [SegmATRon Habitat data](https://drive.google.com/file/d/10oYGLo9d8xso5M5XDxWjuq-cXzZ4Q3sv/view?usp=drive_link)
+- [SegmATRon AI2-Thor data](https://drive.google.com/file/d/1-sWox5ezZBcF1DRLLYT7CUC01C7buhCy/view?usp=drive_link)
 
 Expected data and pretrained checkpoints structure:
     segmatron/
         checkpoints/
-            single_frame_baseline.pt
-            segmatron_1_step.pt
+            mask2former_single_frame.pt
+            maskdino_single_frame.pt
+            segmatron_mask2former.pt
+            segmatron_maskdino.pt
         data/
             segmatron_ai2thor/
                 annotations/
                 test/
                 test_mask/
-            segmatron_habiti/
+            segmatron_habitat/
                 annotations/
                 val/
                 val_mask/
@@ -63,30 +67,43 @@ Expected data and pretrained checkpoints structure:
 
 Evaluation of the SegmATRon (1 step) model and OneFormer (Single Frame baseline) can be performed by running 
 
-OneFormer Single Frame baseline on AI2-THOR dataset:
+Mask2Former Single Frame baseline on AI2-THOR dataset:
 
-``python evaluate.py --config=configs/oneformer_single_frame_baseline_ai2thor.yaml``.
+``python evaluate.py --config=configs/mask2former/mask2former_single_frame_baseline_r50_ai2thor.yaml``.
 
-OneFormer Single Frame baseline on Habitat dataset:
+Mask2Former Single Frame baseline on Habitat dataset:
 
-``python evaluate.py --config=configs/oneformer_single_frame_baseline_habitat.yaml``.
+``python evaluate.py --config=configs/mask2former/mask2former_single_frame_baseline_r50_habitat.yaml``.
 
-SegmATRon (1 step) on AI2-THOR dataset:
+SegmATRon (Mask2Former) on AI2-THOR dataset:
 
-``python evaluate.py --config=configs/config_segmatron_1_step_ai2thor.yaml``.
+``python evaluate.py --config=configs/mask2former/segmatron_mask2former_4_steps_r50_ai2thor.yaml``.
 
-SegmATRon (1 step) on Habitat dataset:
+SegmATRon (Mask2Former) on Habitat dataset:
 
-``python evaluate.py --config=configs/config_segmatron_1_step_habitat.yaml``.
+``python evaluate.py --config=configs/mask2former/segmatron_mask2former_4_steps_r50_habitat.yaml``.
+
+MaskDINO Single Frame baseline on AI2-THOR dataset:
+
+``python evaluate.py --config=configs/maskdino/maskdino_single_frame_baseline_r50_ai2thor.yaml``.
+
+MaskDINO  Single Frame baseline on Habitat dataset:
+
+``python evaluate.py --config=configs/maskdino/maskdino_single_frame_baseline_r50_habitat.yaml``.
+
+SegmATRon (MaskDINO) on AI2-THOR dataset:
+
+``python evaluate.py --config=configs/maskdino/segmatron_maskdino_4_steps_r50_ai2thor.yaml``.
+
+SegmATRon (MaskDINO) on Habitat dataset:
+
+``python evaluate.py --config=configs/maskdino/segmatron_maskdino_4_steps_r50_habitat.yaml``.
 
 The code will automatically take over current GPU device.
 
 The evaluator will output visualizations and results in a folder called
 `evaluation_results/`. 
 
-Note: the evaluation results can be slightly different depending on the specific random actions chosen by SegmATRon (1 step). For demo purposes we set random seed equal to 0.
+Note: the evaluation results can be slightly different depending on the specific random actions chosen by SegmATRon (1 step). For demo purposes we set random seeds.
 
 
-## Acknowledgements
-
-We thank the authors of OneFormer (https://github.com/SHI-Labs/OneFormer), Interactron (https://github.com/allenai/interactron), and DETR (https://github.com/facebookresearch/detr) for releasing their helpful codebases.

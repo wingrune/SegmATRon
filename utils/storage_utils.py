@@ -1,4 +1,3 @@
-# This code is copied from https://github.com/allenai/interactron
 import torch
 
 
@@ -56,9 +55,6 @@ def collate_fn(batch):
         'frames': torch.stack([torch.stack(b['frames']) for b in batch]),
         "masks": torch.stack([torch.stack(b['masks']) for b in batch]),
         "actions": torch.stack([torch.tensor(b['actions'], dtype=torch.long) for b in batch]),
-        #"object_ids": [[torch.tensor(inst, dtype=torch.long) for inst in b['object_ids']] for b in batch],
-        #"category_ids": [[inst for inst in b['category_ids']] for b in batch],
-        #"boxes": [[inst for inst in b['boxes']] for b in batch],
         "episode_ids": torch.stack([torch.tensor(b['episode_ids'], dtype=torch.long) for b in batch]),
         "initial_image_path": [b['initial_image_path'] for b in batch],
         "height": [b['height'] for b in batch],

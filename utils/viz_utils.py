@@ -1,4 +1,3 @@
-# This code is copied from https://github.com/allenai/interactron
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +33,6 @@ def draw_preds_and_labels(images, preds, labels):
     for i in range(matched_labels.shape[0]):
         img = draw_box(img, matched_labels[i], (255, 0, 0), 2)
     for i in range(gt_labels.shape[0]):
-        # img = draw_box(img, preds[i], (0, 0, 0), 1)
         img = draw_box(img, gt_labels[i], (0, 255, 0), 1)
     return torch.tensor(img)
 

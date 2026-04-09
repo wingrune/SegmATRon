@@ -12,11 +12,11 @@ To get into the SegmATRon docker container run.
 ```
 bash ./into.sh
 ```
-You may need to change the paths inside the "into.sh" script to make them correspond to your local paths.
+You may need to change the paths to make them correspond to your local paths.
 
 Finally, setup CUDA Kernel for MSDeformAttn.
 ```
-cd /segmatron/models/oneformer/modeling/pixel_decoder/ops
-sudo env "PATH=$PATH" sh make.sh
+cd /segmatron/models/mask2former/modeling/pixel_decoder/ops
+python setup.py build install
 cd ../../../../..
 ```

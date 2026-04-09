@@ -1,4 +1,3 @@
-# This code is copied from https://github.com/allenai/interactron
 import collections
 import torch
 
@@ -19,6 +18,9 @@ def get_parameters(model):
             #exit()
             if param is not None and param.requires_grad:
                 params.append(param)
+                if param.device == torch.device('cpu'):
+                    print(name, "param on cpu!")
+                    exit()
                 #print("Appended param")
         return params
         # return [child for child in model._parameters.values() if child.requires_grad]

@@ -1,0 +1,18 @@
+RANDOM_SEED: 96964
+MODEL:
+  TYPE: "mask2former"
+  CONFIG: ./configs/mask2former/config_mask2former_ade20k_r50.yaml
+  WEIGHTS: checkpoints/mask2former/model_final_500878.pkl
+  NUM_CLASSES: 150
+DATASET:
+  TEST:
+    TYPE: "multistep"
+    MODE: "test"
+    ANNOTATION_ROOT: "data/segmatron_ai2thor/annotations/segmatron_v1_test.json"
+    IMAGE_ROOT: "data/segmatron_ai2thor/test"
+EVALUATOR:
+  TYPE: "random_policy_evaluator"
+  BATCH_SIZE: 1
+  NUM_WORKERS: 1
+  OUTPUT_DIRECTORY: "evaluation_results/mask2former_single_frame_ai2thor"
+  CHECKPOINT: "checkpoints/mask2former_single_frame.pt"

@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-devel
+FROM pytorch/pytorch:2.4.1-cuda12.1-cudnn9-devel
 
 # Instal basic utilities
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub && \
@@ -10,13 +10,13 @@ RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/
 
 RUN pip3 install -U opencv-python
 RUN python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
-COPY docker/requirements.txt ./
+#COPY docker/requirements.txt ./
+#RUN pip install -r requirements.txt
 
-RUN pip install -r requirements.txt
-
+USER root
 RUN wget -qO /usr/local/bin/ninja.gz https://github.com/ninja-build/ninja/releases/latest/download/ninja-linux.zip
 RUN gunzip /usr/local/bin/ninja.gz
 RUN chmod a+x /usr/local/bin/ninja
 
-ADD ./ /segmatron/
-WORKDIR /segmatron/
+#ADD ./ /segmatron/
+#WORKDIR /segmatron/

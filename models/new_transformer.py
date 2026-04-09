@@ -54,7 +54,7 @@ def get_1d_sincos_pos_embed_from_grid(embed_dim, pos):
     out: (M, D)
     """
     assert embed_dim % 2 == 0
-    omega = np.arange(embed_dim // 2, dtype=np.float)
+    omega = np.arange(embed_dim // 2, dtype=np.float32)
     omega /= embed_dim / 2.
     omega = 1. / 10000**omega  # (D/2,)
 
@@ -75,7 +75,14 @@ class SemanticMultiStepTransformer(nn.Module):
         print("INPUT FEATURE RESOLUTION", self.input_feature_resolution)
         self.img_feature_embedding = nn.Linear(config.MODEL.IMG_FEATURE_SIZE, config.MODEL.EMBEDDING_DIM)
         self.prediction_embedding = MLP(config.MODEL.MASK_EMB_SIZE + config.MODEL.NUM_CLASSES + 1, 512, config.MODEL.EMBEDDING_DIM, 3)
-        self.mask_decoder = MLP(config.MODEL.OUTPUT_SIZE, 512, 64 * self.input_feature_resolution * self.input_feature_resolution, 3)
+        self.model_type = config.MODEL.TYPE
+        if config.MODEL.TYPE in ["mask2former_segmatron", "mask2former_adapt", "mask2former_adapt_random"]:
+            self.mask_decoder = MLP(config.MODEL.OUTPUT_SIZE, 512, 64 * self.input_feature_resolution * self.input_feature_resolution, 3)
+        elif self.model_type == "maskdino_adapt":
+            self.mask_decoder = MLP(config.MODEL.OUTPUT_SIZE, 512, 64 * 10 * 10, 3)
+        elif config.MODEL.TYPE == "oneformer_multiframe":
+            self.mask_decoder = MLP(config.MODEL.OUTPUT_SIZE, 512, 256, 3)
+
         self.logit_decoder = nn.Linear(config.MODEL.OUTPUT_SIZE, config.MODEL.NUM_CLASSES + 1)
         self.loss_decoder = MLP(config.MODEL.OUTPUT_SIZE, 512, 1, 3)
 
@@ -86,11 +93,24 @@ class SemanticMultiStepTransformer(nn.Module):
         decoder_layer = TransformerDecoderLayer(config.MODEL.EMBEDDING_DIM, config.MODEL.NUM_HEADS, 2048, 0.1, "relu", False)
         decoder_norm = nn.LayerNorm(config.MODEL.EMBEDDING_DIM)
         self.transformer = TransformerDecoder(decoder_layer, config.MODEL.NUM_LAYERS, decoder_norm, return_intermediate=False)
-
+        if self.model_type == "mask2former_adapt_new":
+            weights = torch.load("checkpoints/pretrained_weights/detector.pt", map_location=torch.device('cpu'))
+            transformer_weights = {
+                k.partition("transformer.")[2]:v
+                for k, v in weights['model'].items()
+                if "fusion.transformer" in k
+            }
+            loss_weights = {
+                k.partition("loss_decoder.")[2]:v
+                for k, v in weights['model'].items()
+                if "loss_decoder" in k
+            }
+            self.transformer.load_state_dict(transformer_weights)
+            self.loss_decoder.load_state_dict(loss_weights)
         self.img_len = self.input_feature_resolution * self.input_feature_resolution
         self.num_actions = config.MODEL.NUM_ACTIONS
         self.pos_embed = nn.Parameter(torch.zeros(1, config.MODEL.NUM_ACTIONS*self.img_len, config.MODEL.EMBEDDING_DIM), requires_grad=False)
-        self.num_queries = 250
+        self.num_queries = config.MODEL.NUM_QUERIES
         self.embed_dim = config.MODEL.EMBEDDING_DIM
         self.query_embed = nn.Parameter(torch.zeros(1, self.num_queries*config.MODEL.NUM_ACTIONS + config.MODEL.NUM_ACTIONS, config.MODEL.EMBEDDING_DIM), requires_grad=True)
         self.init_pos_emb()
@@ -99,13 +119,14 @@ class SemanticMultiStepTransformer(nn.Module):
         # fold data into sequence
         img_feature_embedding = self.img_feature_embedding(x["embedded_memory_features"].permute(0, 1, 3, 4, 2))
         b, s, p, h, w = x["pred_masks"].shape 
+
         preds = torch.cat((x["mask_features"], x["pred_logits"]), dim=-1)
         prediction_embeddings = self.prediction_embedding(preds) # B X S X P X N
         b, s, p, n = prediction_embeddings.shape
-
         memory = torch.zeros((b, self.num_actions * self.input_feature_resolution * self.input_feature_resolution, n), device=prediction_embeddings.device)
         memory[:, :(s * self.input_feature_resolution * self.input_feature_resolution)] = img_feature_embedding.reshape(b, -1, n)
         tgt = torch.zeros((b, self.num_actions * self.num_queries + self.num_actions , n), device=prediction_embeddings.device)
+
         tgt[:, :(s * self.num_queries)] = prediction_embeddings.reshape(b, -1, n)
         tgt[:, self.num_actions *self.num_queries:(self.num_actions *self.num_queries + self.num_actions )] = self.action_tokens.repeat(b, 1, 1).reshape(b, -1, n)
         mask = torch.zeros((b, self.num_actions  * self.input_feature_resolution * self.input_feature_resolution), dtype=torch.bool, device=x["mask_features"].device)
@@ -116,12 +137,20 @@ class SemanticMultiStepTransformer(nn.Module):
 
         # unfold data
         y_preds = y[:, :-self.num_actions].reshape(b, s, p, -1)
+        if self.model_type in ["mask2former_segmatron", "mask2former_adapt", "maskdino_adapt", "mask2former_adapt_random"]:
+            masks = self.mask_decoder(y_preds).sigmoid().reshape(b, s, p, h, w)
+        elif self.model_type == "oneformer_multiframe":
+            mask_embed = self.mask_decoder(y_preds)
+            masks = torch.einsum("bspc,bschw->bsphw", mask_embed, x["oneformer_mask_features"])
 
-        masks = self.mask_decoder(y_preds).sigmoid().reshape(b, s, p, h, w)
         logits = self.logit_decoder(y_preds)
+
         loss = self.loss_decoder(y_preds)
 
-        actions = self.action_decoder(y[:, -self.num_actions :-1].reshape(b,self.num_actions-1, -1))
+        if self.num_actions > 1:
+            actions = self.action_decoder(y[:, -self.num_actions :-1].reshape(b,self.num_actions-1, -1))
+        else:
+            actions = torch.zeros(b)
 
         return {"seq": y_preds.squeeze(), "pred_masks": masks.squeeze(), "pred_logits": logits.squeeze(),
                 "loss": loss, "actions": actions.squeeze()}

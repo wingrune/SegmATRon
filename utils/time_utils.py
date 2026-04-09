@@ -1,4 +1,3 @@
-# This code is copied from https://github.com/allenai/interactron
 import time
 
 
